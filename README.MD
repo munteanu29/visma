@@ -1,3 +1,8 @@
+Link:
+- http://13.67.224.139:3001/ 
+- http://13.67.224.139:5000/index.html
+
+
 SETUP
 
 - NODE.JS
