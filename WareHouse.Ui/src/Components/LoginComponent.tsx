@@ -12,8 +12,8 @@ export const LoginComponent = (props: LoginProps) => {
 
   const SubmitForm = () => {
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    const emailValidated = re.test(String(email).toLowerCase());
-    const passwordValidated = password.length >= 6;
+    const emailValidated = email && re.test(String(email).toLowerCase());
+    const passwordValidated = password && password.length >= 6;
 
     if(emailValidated && passwordValidated)
         Login(email, password).then((authorized) => authorized ? props.onSuccessfullLogin() : console.log("invalid credentials")).catch(e => console.log(e));
