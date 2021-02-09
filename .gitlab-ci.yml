@@ -1,0 +1,43 @@
+image: docker:latest
+
+stages:
+  - build
+  - deploy
+
+build-frontend:
+  stage: build
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build --pull -t "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_frontend" -t "${CI_REGISTRY_IMAGE}:frontend_latest" ./ContracteVoluntariat.Ui
+    - docker push "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_frontend"
+    - docker push "${CI_REGISTRY_IMAGE}:frontend_latest"
+  only:
+    - master
+
+build-backend:
+  stage: build
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build --pull -t "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_backend" -t "${CI_REGISTRY_IMAGE}:backend_latest" .
+    - docker push "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_backend"
+    - docker push "${CI_REGISTRY_IMAGE}:backend_latest"
+  only:
+    - master
+
+.deploy base: &deploy_base
+  stage: deploy
+  image: registry.ligaac.ro:4567/docker-base/deploy-runner:latest
+  before_script:
+    - eval $(ssh-agent -s)
+    - printenv DEPLOY_KEY_WEB_SHIVA | ssh-add -
+  #    - VERSION=$(sentry-cli releases propose-version)
+  script:
+    - ssh -o "StrictHostKeyChecking=no" gitlab-runner@web.shiva.ligaac.ro "GITLAB_DEPLOY_TAG=${CI_COMMIT_SHA}_frontend sudo /opt/deploy/_deploy.sh /home/docker/contracte-voluntariat"
+  #    - sentry-cli releases deploys $VERSION new -e ${DEPLOY_DOMAIN}
+  only:
+    - master
+
+deploy live:
+  <<: *deploy_base

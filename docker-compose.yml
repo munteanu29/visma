@@ -1,0 +1,25 @@
+﻿version: '3.1'
+services:
+  netcoreapp1:
+    image: netcoreapp-api-image
+    build: .
+    container_name: warehouse
+    restart: always
+    environment:
+      - NETCORE_USER_UID=69
+      - TZ=Europe/Bucharest
+      - ASPNETCORE_URLS=http://+:5030
+    env_file:
+      - ./conf.vars
+    ports:
+      - 5000:5030
+    networks:
+      mariadb-net:
+        aliases:
+          - backend
+
+
+networks:
+  mariadb-net:
+    external:
+      name: db-net
